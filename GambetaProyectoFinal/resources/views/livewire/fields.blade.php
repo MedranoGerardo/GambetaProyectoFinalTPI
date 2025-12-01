@@ -38,9 +38,8 @@
                                     <i class="bi bi-pencil"></i> Editar
                                 </button>
 
-                                <button wire:click="delete({{ $field->id }})" 
-                                    class="btn btn-danger btn-sm"
-                                    onclick="return confirm('¿Eliminar esta cancha?')">
+                                <button wire:click="confirmDelete({{ $field->id }})" 
+                                    class="btn btn-danger btn-sm">
                                     <i class="bi bi-trash"></i> Eliminar
                                 </button>
                             </div>
@@ -56,7 +55,7 @@
         {{ $fields->links() }}
     </div>
 
-    <!-- MODAL -->
+    <!-- MODAL CREAR/EDITAR -->
     @if ($modal)
         <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
             <div class="modal-dialog modal-dialog-centered">
@@ -131,6 +130,42 @@
                         </button>
                         <button type="button" class="btn btn-primary" wire:click="save">
                             <i class="bi bi-save"></i> Guardar
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- MODAL CONFIRMAR ELIMINACIÓN -->
+    @if ($deleteModal)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    
+                    <!-- Header -->
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title">
+                            <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" wire:click="closeDeleteModal"></button>
+                    </div>
+
+                    <!-- Body -->
+                    <div class="modal-body text-center py-4">
+                        <i class="bi bi-trash3 text-danger" style="font-size: 4rem;"></i>
+                        <h5 class="mt-3">¿Está seguro de eliminar esta cancha?</h5>
+                        <p class="text-muted">Esta acción no se puede deshacer.</p>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="closeDeleteModal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="button" class="btn btn-danger" wire:click="delete">
+                            <i class="bi bi-trash"></i> Sí, Eliminar
                         </button>
                     </div>
 

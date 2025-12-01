@@ -14,6 +14,10 @@ class Fields extends Component
     public $name, $type, $price_per_hour, $image, $is_active = true;
     public $field_id;
     public $modal = false;
+    
+    // Nueva propiedad para el modal de eliminación
+    public $deleteModal = false;
+    public $deleteId;
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -81,9 +85,27 @@ class Fields extends Component
         $this->modal = true;
     }
 
-    public function delete($id)
+    // Nuevo método para confirmar eliminación
+    public function confirmDelete($id)
     {
-        Field::find($id)->delete();
+        $this->deleteId = $id;
+        $this->deleteModal = true;
+    }
+
+    // Nuevo método para cerrar modal de eliminación
+    public function closeDeleteModal()
+    {
+        $this->deleteModal = false;
+        $this->deleteId = null;
+    }
+
+    // Método actualizado para eliminar
+    public function delete()
+    {
+        if ($this->deleteId) {
+            Field::find($this->deleteId)->delete();
+            $this->closeDeleteModal();
+        }
     }
 
     public function render()
@@ -93,4 +115,3 @@ class Fields extends Component
         ]);
     }
 }
-
