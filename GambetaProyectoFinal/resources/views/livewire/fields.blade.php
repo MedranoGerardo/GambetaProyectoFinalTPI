@@ -1,108 +1,141 @@
-<div class="p-4">
-
+<div class="container-fluid p-4">
     <!-- Botón crear -->
-    <button wire:click="openModal"
-        class="bg-blue-600 text-white px-4 py-2 rounded mb-3">
-        Agregar Cancha
+    <button wire:click="openModal" class="btn btn-primary mb-3">
+        <i class="bi bi-plus-circle"></i> Agregar Cancha
     </button>
 
     <!-- Tabla -->
-    <table class="w-full border-collapse">
-        <thead>
-            <tr class="bg-gray-200">
-                <th class="p-2 border">Nombre</th>
-                <th class="p-2 border">Tipo</th>
-                <th class="p-2 border">Precio/Hora</th>
-                <th class="p-2 border">Estado</th>
-                <th class="p-2 border">Acciones</th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach ($fields as $field)
+    <div class="table-responsive">
+        <table class="table table-bordered table-striped table-hover">
+            <thead class="table-light">
                 <tr>
-                    <td class="border p-2">{{ $field->name }}</td>
-                    <td class="border p-2">{{ $field->type }}</td>
-                    <td class="border p-2">$ {{ $field->price_per_hour }}</td>
-                    <td class="border p-2">
-                        @if($field->is_active)
-                            <span class="text-green-600 font-bold">Disponible</span>
-                        @else
-                            <span class="text-red-600 font-bold">Inactiva</span>
-                        @endif
-                    </td>
-
-                    <td class="border p-2">
-                        <button wire:click="edit({{ $field->id }})"
-                            class="bg-yellow-500 text-white px-2 py-1 rounded">
-                            Editar
-                        </button>
-
-                        <button wire:click="delete({{ $field->id }})"
-                            class="bg-red-600 text-white px-2 py-1 rounded"
-                            onclick="return confirm('¿Eliminar?')">
-                            Eliminar
-                        </button>
-                    </td>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Precio/Hora</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
                 </tr>
-            @endforeach
-        </tbody>
-    </table>
+            </thead>
 
+            <tbody>
+                @foreach ($fields as $field)
+                    <tr>
+                        <td>{{ $field->name }}</td>
+                        <td>{{ $field->type }}</td>
+                        <td>${{ number_format($field->price_per_hour, 2) }}</td>
+                        <td>
+                            @if($field->is_active)
+                                <span class="badge bg-success">Disponible</span>
+                            @else
+                                <span class="badge bg-danger">Inactiva</span>
+                            @endif
+                        </td>
+
+                        <td>
+                            <div class="btn-group" role="group">
+                                <button wire:click="edit({{ $field->id }})" 
+                                    class="btn btn-warning btn-sm">
+                                    <i class="bi bi-pencil"></i> Editar
+                                </button>
+
+                                <button wire:click="delete({{ $field->id }})" 
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('¿Eliminar esta cancha?')">
+                                    <i class="bi bi-trash"></i> Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Paginación -->
     <div class="mt-3">
         {{ $fields->links() }}
     </div>
 
     <!-- MODAL -->
     @if ($modal)
-        <div class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    
+                    <!-- Header -->
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            {{ $field_id ? 'Editar Cancha' : 'Nueva Cancha' }}
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="closeModal"></button>
+                    </div>
 
-            <div class="bg-white p-6 rounded shadow-lg w-96">
-                <h2 class="text-xl font-bold mb-4">
-                    {{ $field_id ? 'Editar Cancha' : 'Nueva Cancha' }}
-                </h2>
+                    <!-- Body -->
+                    <div class="modal-body">
+                        
+                        <!-- Nombre -->
+                        <div class="mb-3">
+                            <label class="form-label">Nombre</label>
+                            <input type="text" wire:model="name" class="form-control" placeholder="Ej: Cancha 1">
+                            @error('name') 
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
 
-                <!-- FORM -->
-                <div class="mb-3">
-                    <label>Nombre</label>
-                    <input type="text" wire:model="name" class="w-full border p-2">
+                        <!-- Tipo -->
+                        <div class="mb-3">
+                            <label class="form-label">Tipo</label>
+                            <input type="text" wire:model="type" class="form-control" placeholder="Ej: Fútbol 5">
+                            @error('type') 
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Precio -->
+                        <div class="mb-3">
+                            <label class="form-label">Precio por hora</label>
+                            <div class="input-group">
+                                <span class="input-group-text">$</span>
+                                <input type="number" step="0.01" wire:model="price_per_hour" 
+                                    class="form-control" placeholder="0.00">
+                            </div>
+                            @error('price_per_hour') 
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Imagen -->
+                        <div class="mb-3">
+                            <label class="form-label">Imagen (opcional)</label>
+                            <input type="file" wire:model="image" class="form-control">
+                            @error('image') 
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <!-- Estado -->
+                        <div class="mb-3">
+                            <label class="form-label">Disponibilidad</label>
+                            <select wire:model="is_active" class="form-select">
+                                <option value="1">Disponible</option>
+                                <option value="0">Inactiva</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" wire:click="closeModal">
+                            Cancelar
+                        </button>
+                        <button type="button" class="btn btn-primary" wire:click="save">
+                            <i class="bi bi-save"></i> Guardar
+                        </button>
+                    </div>
+
                 </div>
-
-                <div class="mb-3">
-                    <label>Tipo</label>
-                    <input type="text" wire:model="type" class="w-full border p-2">
-                </div>
-
-                <div class="mb-3">
-                    <label>Precio por hora</label>
-                    <input type="number" step="0.01" wire:model="price_per_hour" class="w-full border p-2">
-                </div>
-
-                <div class="mb-3">
-                    <label>Imagen (opcional)</label>
-                    <input type="file" wire:model="image">
-                </div>
-
-                <div class="mb-3">
-                    <label>Disponibilidad</label>
-                    <select wire:model="is_active" class="w-full border p-2">
-                        <option value="1">Disponible</option>
-                        <option value="0">Inactiva</option>
-                    </select>
-                </div>
-
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button wire:click="closeModal" class="px-3 py-1 bg-gray-500 text-white rounded">
-                        Cancelar
-                    </button>
-
-                    <button wire:click="save" class="px-3 py-1 bg-blue-600 text-white rounded">
-                        Guardar
-                    </button>
-                </div>
-
             </div>
         </div>
     @endif
-
 </div>
