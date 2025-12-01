@@ -1,4 +1,7 @@
+version: "3.9"
+
 services:
+
   app:
     build: .
     container_name: laravel_app
@@ -21,22 +24,26 @@ services:
       MYSQL_PASSWORD: apppass
     ports:
       - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password
     volumes:
       - db_data:/var/lib/mysql
     networks:
       - laravel_net
 
   phpmyadmin:
-    image: phpmyadmin:latest
+    image: phpmyadmin
     container_name: phpmyadmin
     environment:
-      PMA_HOST: mysql80
+      PMA_HOST: db
       PMA_USER: root
       PMA_PASSWORD: rootpass
     ports:
       - "8082:80"
+    depends_on:
+      - db
     networks:
       - laravel_net
+
 
 volumes:
   db_data:
