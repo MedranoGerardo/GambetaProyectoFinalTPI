@@ -9,10 +9,16 @@ use Carbon\Carbon;
 
 class Calendar extends Component
 {
-    public $selectedDate;
     public $selectedField;
-    public $start_time;
+    public $selectedDate;
     public $duration;
+    public $start_time;
+
+    public $currentMonth;
+    public $currentYear;
+
+    public $reservedDays = [];
+    public $dayReservations = [];
     public $availableHours = [];
 
     public $successMessage;
@@ -20,41 +26,125 @@ class Calendar extends Component
 
     public function mount()
     {
-        $this->selectedDate = now()->format('Y-m-d');
+        $this->selectedDate = null; 
+        $this->currentMonth = now()->month;
+        $this->currentYear  = now()->year;
     }
 
+    /* ==========================
+        CAMBIO DE CANCHA
+    ========================== */
     public function updatedSelectedField()
     {
-        $this->loadAvailability();
+        $this->selectedDate = null;
+        $this->dayReservations = [];
+        $this->availableHours = [];
+        $this->loadReservedDays();
     }
 
-    public function updatedSelectedDate()
+    /* ==========================
+        MARCAR DÍAS RESERVADOS
+    ========================== */
+    public function loadReservedDays()
     {
+        $this->reservedDays = [];
+
+        if (!$this->selectedField) return;
+
+        $start = Carbon::create($this->currentYear, $this->currentMonth, 1)->toDateString();
+        $end   = Carbon::create($this->currentYear, $this->currentMonth, 1)->endOfMonth()->toDateString();
+
+        $dates = Reservation::where('field_id', $this->selectedField)
+            ->whereBetween('date', [$start, $end])
+            ->pluck('date');
+
+        foreach ($dates as $d) {
+            $this->reservedDays[] = Carbon::parse($d)->day;
+        }
+    }
+
+    /* ==========================
+        NAVEGAR ENTRE MESES
+    ========================== */
+    public function goToNextMonth()
+    {
+        $new = Carbon::create($this->currentYear, $this->currentMonth, 1)->addMonth();
+        $this->currentMonth = $new->month;
+        $this->currentYear  = $new->year;
+
+        $this->loadReservedDays();
+    }
+
+    public function goToPreviousMonth()
+    {
+        $today = Carbon::now()->startOfMonth();
+        $current = Carbon::create($this->currentYear, $this->currentMonth, 1);
+
+        if ($current->lessThanOrEqualTo($today)) return;
+
+        $new = $current->subMonth();
+        $this->currentMonth = $new->month;
+        $this->currentYear  = $new->year;
+
+        $this->loadReservedDays();
+    }
+
+    /* ==========================
+        SELECCIONAR DÍA DEL MES
+    ========================== */
+    public function selectDay($day)
+    {
+        if (!$this->selectedField) return;
+
+        $date = Carbon::create($this->currentYear, $this->currentMonth, $day);
+
+        if ($date->isPast() && !$date->isToday()) return;
+
+        $this->selectedDate = $date->format('Y-m-d');
+
+        $this->loadDayReservations();
         $this->loadAvailability();
     }
 
+    /* ==========================
+        CARGAR RESERVAS DEL DÍA
+    ========================== */
+    public function loadDayReservations()
+    {
+        $this->dayReservations = [];
+
+        if (!$this->selectedDate) return;
+
+        $this->dayReservations = Reservation::with('client')
+            ->where('field_id', $this->selectedField)
+            ->where('date', $this->selectedDate)
+            ->orderBy('start_time', 'ASC')
+            ->get();
+    }
+
+    /* ==========================
+        CARGAR HORAS DISPONIBLES
+    ========================== */
     public function loadAvailability()
     {
-        if (!$this->selectedField || !$this->selectedDate) return;
+        $this->availableHours = [];
 
-        $reservations = Reservation::where('field_id', $this->selectedField)
-            ->where('date', $this->selectedDate)
-            ->get();
+        if (!$this->selectedDate) return;
 
-        // Horas disponibles 6am - 10pm
+        // generar horas base 6am–10pm
         $hours = [];
         for ($i = 6; $i <= 22; $i++) {
             $hours[] = sprintf('%02d:00', $i);
         }
 
-        // Eliminar horas ocupadas
-        foreach ($reservations as $res) {
-            $busyStart = Carbon::parse($res->start_time)->format('H:00');
-            $busyEnd = Carbon::parse($res->end_time)->format('H:00');
+        foreach ($this->dayReservations as $res) {
 
-            foreach ($hours as $index => $h) {
-                if ($h >= $busyStart && $h < $busyEnd) {
-                    unset($hours[$index]);
+            $start = Carbon::parse($res->start_time)->format('H:00');
+            $end   = Carbon::parse($res->end_time)->format('H:00');
+
+            foreach ($hours as $i => $hour) {
+                if ($hour >= $start && $hour < $end) {
+                    unset($hours[$i]);
                 }
             }
         }
@@ -62,55 +152,56 @@ class Calendar extends Component
         $this->availableHours = array_values($hours);
     }
 
-
+    /* ==========================
+        RESERVAR
+    ========================== */
     public function reserve()
     {
         $this->validate([
             'selectedField' => 'required',
-            'selectedDate' => 'required',
-            'start_time' => 'required',
-            'duration' => 'required|numeric|min:1'
+            'selectedDate'  => 'required',
+            'start_time'    => 'required',
+            'duration'      => 'required|numeric|min:1'
         ]);
-        
 
-        // Calcular hora final
-    $duration = intval($this->duration);  // convertir string → entero
-    $end = Carbon::parse($this->start_time)
-                ->addHours($duration)
-                ->format('H:i');
+        $end = Carbon::parse($this->start_time)
+                    ->addHours($this->duration)
+                    ->format('H:i');
 
-
-        // Verificar choque
-        $check = Reservation::where('field_id', $this->selectedField)
-            ->where('date', $this->selectedDate)
+        $conflict = Reservation::where([
+                ['field_id', '=', $this->selectedField],
+                ['date', '=', $this->selectedDate],
+            ])
             ->where(function ($q) {
                 $q->whereBetween('start_time', [$this->start_time, $this->start_time])
                   ->orWhereBetween('end_time', [$this->start_time, $this->start_time]);
-            })->first();
+            })
+            ->first();
 
-        if ($check) {
-            $this->errorMessage = "Este horario ya está ocupado.";
+        if ($conflict) {
+            $this->errorMessage = "⚠ Ese horario ya está reservado.";
             $this->successMessage = null;
             return;
         }
 
         Reservation::create([
-            'client_id' => 1, // temporal para pruebas
-            'field_id' => $this->selectedField,
-            'user_id' => auth()->id() ?? 1,
-            'date' => $this->selectedDate,
-            'start_time' => $this->start_time,
-            'end_time' => $end,
+            'client_id'   => 1,
+            'field_id'    => $this->selectedField,
+            'user_id'     => auth()->id() ?? 1,
+            'date'        => $this->selectedDate,
+            'start_time'  => $this->start_time,
+            'end_time'    => $end,
             'total_price' => 10 * $this->duration,
-            'status' => 'pendiente'
+            'status'      => 'pendiente'
         ]);
 
         $this->successMessage = "Reserva creada correctamente.";
         $this->errorMessage = null;
 
+        $this->loadReservedDays();
+        $this->loadDayReservations();
         $this->loadAvailability();
     }
-
 
     public function render()
     {

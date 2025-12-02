@@ -16,6 +16,7 @@
 
     <!-- Estilos personalizados -->
     <link rel="stylesheet" href="{{ asset('css/styles.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/calendar.css') }}"> {{-- <- TU ARCHIVO CSS EXTRA --}}
 
     @livewireStyles
 </head>

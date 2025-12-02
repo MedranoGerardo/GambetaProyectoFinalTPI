@@ -1,79 +1,270 @@
+/* ============================================================
+   VARIABLES DE COLOR PARA MODO CLARO Y OSCURO
+============================================================ */
+:root {
+    /* Modo claro */
+    --cal-bg-card: #ffffff;
+    --cal-text: #111;
+    --cal-day: #e9ecef;
+    --cal-day-hover: #d5d7db;
+    --cal-day-selected: #1f78ff;
+    --cal-day-reserved: #ff4d4d;
+    --cal-day-past: #b5b5b5;
+}
+
+.dark-mode {
+    /* Modo oscuro */
+    --cal-bg-card: #111627;
+    --cal-text: #ffffff;
+    --cal-day: #2a2f43;
+    --cal-day-hover: #3a3f55;
+    --cal-day-selected: #3388ff;
+    --cal-day-reserved: #ff6b6b;
+    --cal-day-past: #444;
+}
+
+
+/* ============================================================
+   CONTENEDOR GENERAL
+============================================================ */
 .reservation-container {
-    display: flex;
-    gap: 2rem;
-    padding: 2rem;
-    flex-wrap: wrap;
+    color: var(--cal-text);
 }
 
-.left-panel {
-    flex: 1 1 280px;
+
+/* ============================================================
+   TARJETAS
+============================================================ */
+.card {
+    background: var(--cal-bg-card) !important;
+    border-radius: 18px !important;
+    border: none;
+    color: var(--cal-text) !important;
 }
 
-.right-panel {
-    flex: 2 1 500px;
+
+/* ============================================================
+   GRID DEL CALENDARIO
+============================================================ */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
 }
 
-.field-info-card {
-    background: white;
-    border-radius: 16px;
-    padding: 1.5rem;
+.calendar-week-header {
+    color: var(--cal-text);
+    font-weight: bold;
     text-align: center;
 }
 
-.field-image {
-    width: 100%;
-    border-radius: 12px;
-}
 
-.field-title {
-    font-weight: bold;
-    margin-top: 1rem;
-    font-size: 1.5rem;
-}
-
-.field-type {
-    color: #6c757d;
-}
-
-.field-price {
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: #198754;
-}
-
-/* --- HORAS --- */
-.hours-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-    gap: .8rem;
-}
-
-.hour-btn {
-    padding: .7rem;
+/* ============================================================
+   DÍAS DEL CALENDARIO
+============================================================ */
+.calendar-day {
+    background: var(--cal-day);
+    color: var(--cal-text);
+    padding: 12px;
+    text-align: center;
     border-radius: 10px;
-    border: none;
+    cursor: pointer;
     font-weight: bold;
-    transition: .2s;
+    transition: 0.2s ease-in-out;
+    border: 2px solid transparent;
 }
 
-.hour-btn.available {
-    background: #198754;
-    color: white;
+/* Hover */
+.calendar-day:hover {
+    background: var(--cal-day-hover);
+    transform: scale(1.06);
 }
 
-.hour-btn.available:hover {
-    transform: scale(1.05);
-    background: #157347;
+/* Día reservado (rojo) */
+.calendar-day.reserved {
+    background: var(--cal-day-reserved) !important;
+    border-color: var(--cal-day-reserved) !important;
+    color: #fff !important;
 }
 
-.hour-btn.blocked {
-    background: #d5d5d5;
-    color: #777;
+.calendar-day.reserved:hover {
+    background: #ff2e2e !important;
 }
 
-/* Responsivo */
+/* Día seleccionado (azul) */
+.calendar-day.selected {
+    background: var(--cal-day-selected) !important;
+    border-color: var(--cal-day-selected) !important;
+    color: #fff !important;
+    transform: scale(1.08);
+}
+
+/* Día pasado */
+.calendar-day.past {
+    background: var(--cal-day-past) !important;
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.calendar-day.past:hover {
+    transform: none !important;
+}
+
+/* Día vacío */
+.empty-day {
+    visibility: hidden;
+}
+
+
+/* ============================================================
+   BOTONES DEL MES
+============================================================ */
+.calendar-header button {
+    border-radius: 10px;
+    padding: 5px 15px;
+    font-weight: bold;
+    color: var(--cal-text);
+    border-color: var(--cal-text) !important;
+}
+
+.calendar-header h4 {
+    font-size: 22px;
+    text-transform: capitalize;
+    color: var(--cal-text);
+}
+
+
+/* ============================================================
+   HORAS DISPONIBLES
+============================================================ */
+.btn-outline-primary {
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+.btn-primary {
+    border-radius: 12px;
+    font-weight: bold;
+}
+
+
+/* ============================================================
+   ALERTAS
+============================================================ */
+.alert {
+    border-radius: 12px;
+    font-size: 15px;
+}
+
+
+/* ============================================================
+   RESPONSIVE DESIGN
+============================================================ */
+
+/* Tablets medianas */
+@media (max-width: 992px) {
+    .calendar-day {
+        padding: 10px;
+        border-radius: 8px;
+        font-size: 14px;
+    }
+
+    .calendar-header h4 {
+        font-size: 20px;
+    }
+}
+
+/* Tablets pequeñas + móviles grandes */
 @media (max-width: 768px) {
-    .reservation-container {
-        flex-direction: column;
+
+    .calendar-grid {
+        gap: 6px;
+    }
+
+    .calendar-day {
+        padding: 8px;
+        font-size: 13px;
+        border-radius: 8px;
+    }
+
+    .calendar-week-header div {
+        font-size: 13px;
+    }
+
+    .calendar-header h4 {
+        font-size: 18px;
+    }
+
+    .calendar-header button {
+        padding: 4px 12px;
+    }
+
+    .card {
+        margin-bottom: 16px;
+    }
+}
+
+/* Móviles pequeños */
+@media (max-width: 540px) {
+
+    .calendar-grid {
+        gap: 5px;
+    }
+
+    .calendar-day {
+        padding: 6px;
+        font-size: 11px;
+        border-radius: 6px;
+    }
+
+    .calendar-week-header div {
+        font-size: 11px;
+    }
+
+    .calendar-header h4 {
+        font-size: 16px;
+    }
+
+    .calendar-header button {
+        padding: 3px 10px;
+        font-size: 12px;
+    }
+
+    .btn-outline-primary,
+    .btn-primary {
+        padding: 6px 12px;
+        font-size: 12px;
+        border-radius: 8px;
+    }
+}
+
+/* Móviles ultra pequeños (320px - 400px) */
+@media (max-width: 400px) {
+
+    .calendar-grid {
+        gap: 4px;
+    }
+
+    .calendar-day {
+        padding: 5px;
+        font-size: 10px;
+        border-radius: 5px;
+    }
+
+    .calendar-week-header div {
+        font-size: 10px;
+    }
+
+    .calendar-header h4 {
+        font-size: 14px;
+    }
+
+    .calendar-header button {
+        padding: 2px 8px;
+        font-size: 11px;
+    }
+
+    .alert {
+        font-size: 13px;
     }
 }
