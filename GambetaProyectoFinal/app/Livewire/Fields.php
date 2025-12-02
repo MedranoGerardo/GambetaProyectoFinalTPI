@@ -19,6 +19,11 @@ class Fields extends Component
     public $deleteModal = false;
     public $deleteId;
 
+    /************************************** */
+    public $duplicateModal = false;
+    public $duplicateMessage = '';
+    /************************************** */
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'type' => 'required|string|max:255',
@@ -48,12 +53,26 @@ class Fields extends Component
         $this->is_active = true;
     }
 
+    /****************************************************** */
     public function save()
     {
         $this->validate();
 
-        $path = null;
+        // Validación de duplicado (nombre + tipo)
+        $exists = Field::where('name', $this->name)
+               ->when($this->field_id, function ($query) {
+                   $query->where('id', '!=', $this->field_id);
+               })
+               ->exists();
 
+        if ($exists) {
+            $this->duplicateMessage = "El nombre de la cancha ya está registrado. Cambie el nombre para continuar.";
+            $this->duplicateModal = true;
+            return;
+        }
+
+        // Procesamiento de imagen
+        $path = null;
         if ($this->image) {
             $path = $this->image->store('fields', 'public');
         }
@@ -71,6 +90,7 @@ class Fields extends Component
 
         $this->closeModal();
     }
+    /****************************************************** */
 
     public function edit($id)
     {

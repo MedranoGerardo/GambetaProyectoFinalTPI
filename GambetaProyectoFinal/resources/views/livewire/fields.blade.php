@@ -173,4 +173,35 @@
             </div>
         </div>
     @endif
+
+    <!-- MODAL REGISTRO DUPLICADO -->
+    <!-- ************************************************************************************** -->
+    @if ($duplicateModal)
+        <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+
+                    <div class="modal-header bg-warning">
+                        <h5 class="modal-title text-dark">
+                            <i class="bi bi-exclamation-circle"></i> Registro duplicado
+                        </h5>
+                        <button type="button" class="btn-close" wire:click="$set('duplicateModal', false)"></button>
+                    </div>
+
+                    <div class="modal-body text-center">
+                        <p class="fw-bold">{{ $duplicateMessage }}</p>
+                        <p class="text-muted">El nombre de la cancha ya está registrado. Cambie el nombre para continuar.</p>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button class="btn btn-warning" wire:click="$set('duplicateModal', false)">
+                            Entendido
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    @endif
+    <!-- ************************************************************************************** -->
 </div>
