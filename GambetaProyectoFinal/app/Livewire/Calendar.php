@@ -164,8 +164,10 @@ class Calendar extends Component
             'duration'      => 'required|numeric|min:1'
         ]);
 
+        $durationInt = floatval($this->duration);
+
         $end = Carbon::parse($this->start_time)
-                    ->addHours($this->duration)
+                    ->addHours($durationInt)
                     ->format('H:i');
 
         $conflict = Reservation::where([
@@ -191,7 +193,7 @@ class Calendar extends Component
             'date'        => $this->selectedDate,
             'start_time'  => $this->start_time,
             'end_time'    => $end,
-            'total_price' => 10 * $this->duration,
+            'total_price' => 10 * $durationInt,
             'status'      => 'pendiente'
         ]);
 
