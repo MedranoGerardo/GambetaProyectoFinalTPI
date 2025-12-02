@@ -1,0 +1,155 @@
+
+/* Texto general */
+.light-mode {
+    background-color: #F5F6FA !important;
+    color: #111 !important;
+}
+
+.dark-mode {
+    background-color: #0A0E1F !important;
+    color: #fff !important;
+}
+
+/* Títulos */
+.light-mode h1, 
+.light-mode h2, 
+.light-mode h3, 
+.light-mode h4, 
+.light-mode h5, 
+.light-mode h6 {
+    color: #111 !important;
+}
+
+.dark-mode h1, 
+.dark-mode h2, 
+.dark-mode h3, 
+.dark-mode h4, 
+.dark-mode h5, 
+.dark-mode h6 {
+    color: #fff !important;
+}
+
+/* Enlaces en navbar */
+.light-mode .navbar .nav-link {
+    color: #111 !important;
+}
+
+.dark-mode .navbar .nav-link {
+    color: #fff !important;
+}
+
+.nav-link:hover {
+    color: #0099FF !important;
+}
+
+/* Botones outline */
+.light-mode .btn-outline-light {
+    color: #111 !important;
+    border-color: #0066CC !important;
+}
+
+.dark-mode .btn-outline-light {
+    color: #fff !important;
+    border-color: #0099FF !important;
+}
+
+/* ================================================
+   MODO OSCURO (DEFAULT)
+================================================ */
+
+.dark-mode .navbar {
+    background-color: #0A0E1F !important;
+    border-bottom: 1px solid #0099FF;
+}
+
+.dark-mode .footer {
+    background-color: #0A0E1F !important;
+    border-top: 2px solid #0099FF;
+    color: white !important;
+}
+
+.dark-mode .feature-card {
+    background: #111627;
+    border: 1px solid #0099FF;
+    color: white !important;
+}
+
+.dark-mode .feature-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #0099FF80;
+}
+
+/* HERO noche */
+.dark-mode .hero-section {
+    height: 90vh;
+    background:
+        linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)),
+        url('https://images.unsplash.com/photo-1521412644187-c49fa049e84d?w=1600')
+        center/cover no-repeat;
+}
+
+/* ================================================
+   MODO CLARO
+================================================ */
+
+.light-mode .navbar {
+    background-color: #ffffff !important;
+    border-bottom: 1px solid #0066CC;
+}
+
+.light-mode .footer {
+    background-color: #ffffff !important;
+    border-top: 2px solid #0066CC;
+    color: #111 !important;
+}
+
+.light-mode .feature-card {
+    background-color: #ffffff;
+    border: 1px solid #0066CC;
+    color: #111 !important;
+}
+
+.light-mode .feature-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px #0066CC60;
+}
+
+/* HERO día */
+.light-mode .hero-section {
+    height: 90vh;
+    background:
+        linear-gradient(rgba(255,255,255,0.3), rgba(255,255,255,0.3)),
+        url('https://images.unsplash.com/photo-1519677100203-a0e668c92439?w=1600')
+        center/cover no-repeat;
+}
+
+
+
+/* ================================================
+   FOOTER — ENLACES
+================================================ */
+
+.footer a {
+    text-decoration: none;
+}
+
+.footer a:hover {
+    color: #fff !important;
+    text-shadow: 0 0 10px #0099FF;
+}
+
+.social-icons i {
+    transition: 0.3s;
+}
+
+.social-icons i:hover {
+    transform: scale(1.2);
+}
+
+
+.hero-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
