@@ -15,3 +15,7 @@ Route::get('/fields', function () {
 Route::get('/calendar', function () {
     return view('calendar');
 });
+
+Route::get('/reservations', function () {
+    return view('reservations');
+});
