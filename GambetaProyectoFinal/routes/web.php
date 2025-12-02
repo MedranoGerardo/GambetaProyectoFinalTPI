@@ -17,3 +17,7 @@ Route::get('/calendar', function () {
 });
 
 
+
+Route::get('/reservations', function () {
+    return view('reservations');
+});
