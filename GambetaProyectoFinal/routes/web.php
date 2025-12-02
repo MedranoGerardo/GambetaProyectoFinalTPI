@@ -9,3 +9,8 @@ Route::get('/', function () {
 Route::get('/fields', function () {
     return view('fields');
 });
+
+
+Route::get('/calendar', function () {
+    return view('calendar');
+});

@@ -1,0 +1,79 @@
+.reservation-container {
+    display: flex;
+    gap: 2rem;
+    padding: 2rem;
+    flex-wrap: wrap;
+}
+
+.left-panel {
+    flex: 1 1 280px;
+}
+
+.right-panel {
+    flex: 2 1 500px;
+}
+
+.field-info-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.field-image {
+    width: 100%;
+    border-radius: 12px;
+}
+
+.field-title {
+    font-weight: bold;
+    margin-top: 1rem;
+    font-size: 1.5rem;
+}
+
+.field-type {
+    color: #6c757d;
+}
+
+.field-price {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #198754;
+}
+
+/* --- HORAS --- */
+.hours-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: .8rem;
+}
+
+.hour-btn {
+    padding: .7rem;
+    border-radius: 10px;
+    border: none;
+    font-weight: bold;
+    transition: .2s;
+}
+
+.hour-btn.available {
+    background: #198754;
+    color: white;
+}
+
+.hour-btn.available:hover {
+    transform: scale(1.05);
+    background: #157347;
+}
+
+.hour-btn.blocked {
+    background: #d5d5d5;
+    color: #777;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .reservation-container {
+        flex-direction: column;
+    }
+}
