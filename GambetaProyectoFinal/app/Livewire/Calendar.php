@@ -181,7 +181,7 @@ class Calendar extends Component
             ->first();
 
         if ($conflict) {
-            $this->errorMessage = "⚠ Ese horario ya está reservado.";
+            $this->errorMessage = "Ese horario ya está reservado.";
             $this->successMessage = null;
             return;
         }
