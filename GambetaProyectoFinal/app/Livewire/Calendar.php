@@ -133,28 +133,33 @@ class Calendar extends Component
         $this->availableHours = array_values($hours);
     }
 
+      /* ==========================
+        funcion de reservar
+    ========================== */
     public function reserve()
     {
         $this->validate([
             'selectedField' => 'required',
             'selectedDate'  => 'required',
             'start_time'    => 'required',
-            'duration'      => 'required|numeric|min:1'
+            'duration'      => 'required|integer|min:1'
         ]);
 
-        $durationInt = floatval($this->duration);
+        // Convertir duration en entero 
+        $this->duration = intval($this->duration);
 
-        $end = Carbon::parse($this->start_time)
-                    ->addHours($durationInt)
-                    ->format('H:i');
+        // Convertir hora de inicio a Carbon
+        $start = Carbon::parse($this->start_time);
 
-        $conflict = Reservation::where([
-                ['field_id', '=', $this->selectedField],
-                ['date', '=', $this->selectedDate],
-            ])
-            ->where(function ($q) {
-                $q->whereBetween('start_time', [$this->start_time, $this->start_time])
-                  ->orWhereBetween('end_time', [$this->start_time, $this->start_time]);
+        // Asegurar que no se pase un string a addHours
+        $end = $start->copy()->addHours($this->duration);
+
+        
+        $conflict = Reservation::where('field_id', $this->selectedField)
+            ->where('date', $this->selectedDate)
+            ->where(function ($q) use ($start, $end) {
+                $q->where('start_time', '<', $end)
+                ->where('end_time', '>', $start);
             })
             ->first();
 
@@ -169,9 +174,9 @@ class Calendar extends Component
             'field_id'    => $this->selectedField,
             'user_id'     => auth()->id() ?? 1,
             'date'        => $this->selectedDate,
-            'start_time'  => $this->start_time,
-            'end_time'    => $end,
-            'total_price' => 10 * $durationInt,
+            'start_time'  => $start->format('H:i'),
+            'end_time'    => $end->format('H:i'),
+            'total_price' => 10 * $this->duration,
             'status'      => 'pendiente'
         ]);
 
@@ -182,7 +187,7 @@ class Calendar extends Component
         $this->loadDayReservations();
         $this->loadAvailability();
     }
-
+    
     /* ==========================
         REINICIAR FORMULARIO
     ========================== */
