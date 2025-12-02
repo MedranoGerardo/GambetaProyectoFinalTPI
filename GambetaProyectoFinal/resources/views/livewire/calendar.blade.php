@@ -200,9 +200,18 @@
 
     <!-- BOTÓN RESERVAR -->
     <div class="text-center mt-4 mb-5">
+
+    @if ($successMessage)
+        <button wire:click="resetForm" class="btn btn-secondary btn-lg px-5 fw-bold shadow">
+            Crear otra reserva
+        </button>
+    @else
         <button wire:click="reserve" class="btn btn-success btn-lg px-5 fw-bold shadow">
             Reservar ahora
         </button>
-    </div>
+    @endif
+
+</div>
+
 
 </div>

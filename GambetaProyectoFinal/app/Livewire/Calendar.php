@@ -31,9 +31,6 @@ class Calendar extends Component
         $this->currentYear  = now()->year;
     }
 
-    /* ==========================
-        CAMBIO DE CANCHA
-    ========================== */
     public function updatedSelectedField()
     {
         $this->selectedDate = null;
@@ -42,9 +39,6 @@ class Calendar extends Component
         $this->loadReservedDays();
     }
 
-    /* ==========================
-        MARCAR DÍAS RESERVADOS
-    ========================== */
     public function loadReservedDays()
     {
         $this->reservedDays = [];
@@ -63,9 +57,6 @@ class Calendar extends Component
         }
     }
 
-    /* ==========================
-        NAVEGAR ENTRE MESES
-    ========================== */
     public function goToNextMonth()
     {
         $new = Carbon::create($this->currentYear, $this->currentMonth, 1)->addMonth();
@@ -89,9 +80,6 @@ class Calendar extends Component
         $this->loadReservedDays();
     }
 
-    /* ==========================
-        SELECCIONAR DÍA DEL MES
-    ========================== */
     public function selectDay($day)
     {
         if (!$this->selectedField) return;
@@ -106,9 +94,6 @@ class Calendar extends Component
         $this->loadAvailability();
     }
 
-    /* ==========================
-        CARGAR RESERVAS DEL DÍA
-    ========================== */
     public function loadDayReservations()
     {
         $this->dayReservations = [];
@@ -122,16 +107,12 @@ class Calendar extends Component
             ->get();
     }
 
-    /* ==========================
-        CARGAR HORAS DISPONIBLES
-    ========================== */
     public function loadAvailability()
     {
         $this->availableHours = [];
 
         if (!$this->selectedDate) return;
 
-        // generar horas base 6am–10pm
         $hours = [];
         for ($i = 6; $i <= 22; $i++) {
             $hours[] = sprintf('%02d:00', $i);
@@ -152,9 +133,6 @@ class Calendar extends Component
         $this->availableHours = array_values($hours);
     }
 
-    /* ==========================
-        RESERVAR
-    ========================== */
     public function reserve()
     {
         $this->validate([
@@ -203,6 +181,24 @@ class Calendar extends Component
         $this->loadReservedDays();
         $this->loadDayReservations();
         $this->loadAvailability();
+    }
+
+    /* ==========================
+        REINICIAR FORMULARIO
+    ========================== */
+    public function resetForm()
+    {
+        $this->selectedField = null;
+        $this->selectedDate = null;
+        $this->duration = null;
+        $this->start_time = null;
+
+        $this->successMessage = null;
+        $this->errorMessage = null;
+
+        $this->reservedDays = [];
+        $this->dayReservations = [];
+        $this->availableHours = [];
     }
 
     public function render()
