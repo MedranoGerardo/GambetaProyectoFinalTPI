@@ -2,10 +2,6 @@
 
     <h2 class="fw-bold text-center mb-4 text-primary">Gestión de Reservas</h2>
 
-    @if ($errorMessage)
-    <div class="alert alert-danger fw-bold shadow-sm">{{ $errorMessage }}</div>
-    @endif
-
     <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-primary shadow-sm px-4" wire:click="openModal">
             <i class="bi bi-plus-circle me-1"></i> Nueva reserva
@@ -121,6 +117,12 @@
 
                 <div class="modal-body">
 
+                    @if ($errorMessage)
+                    <div class="alert alert-danger fw-bold shadow-sm text-center">
+                        {{ $errorMessage }}
+                    </div>
+                    @endif
+
                     <div class="row g-3">
 
                         <div class="col-md-6">
@@ -167,17 +169,15 @@
                             <span class="text-danger small">{{ $message }}</span>
                             @enderror
                         </div>
-
                         <div class="col-md-6">
                             <label>Hora inicio</label>
                             <select wire:model="start_time" class="form-select shadow-sm">
                                 <option value="">Seleccione hora</option>
-                                @for ($h = 0; $h < 24; $h++)
-                                    <option value="{{ sprintf('%02d:00', $h) }}">
-                                    {{ sprintf('%02d:00', $h) }}
-                                    </option>
-                                    @endfor
+                                @foreach($availableHours as $hour)
+                                <option value="{{ $hour }}">{{ $hour }}</option>
+                                @endforeach
                             </select>
+
                             @error('start_time')
                             <span class="text-danger small">{{ $message }}</span>
                             @enderror
