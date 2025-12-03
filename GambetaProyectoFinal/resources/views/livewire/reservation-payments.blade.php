@@ -47,7 +47,7 @@
                         </div>
                         <div>
                             <small class="text-muted d-block mb-1">Cliente</small>
-                            <h5 class="mb-0 fw-bold text-dark-emphasis">{{ $reservation->client->name }}</h5>
+                            <h5 class="mb-0 fw-bold" style="color:#000 !important;">{{ $reservation->client->name }}</h5>
                         </div>
                     </div>
                 </div>
@@ -309,7 +309,7 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border">
-                            <small class="text-muted d-block mb-1">Total Reserva</small>
+                            <h5 class="mb-0 fw-bold {{ $totalPagado > 0 ? 'text-success' : 'text-muted' }}">Total Reserva</h5>
                             <h5 class="mb-0 fw-bold text-primary">
                                 ${{ number_format($reservation->total_price, 2) }}
                             </h5>
@@ -317,7 +317,9 @@
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border">
-                            <small class="text-muted d-block mb-1">Total Pagado</small>
+                            <h5 class="mb-0 fw-bold {{ $totalPagado > 0 ? 'text-success' : 'text-muted' }}">
+                                Total Pagado
+                            </h5>
                             <h5 class="mb-0 fw-bold {{ $totalPagado > 0 ? 'text-success' : 'text-muted' }}">
                                 ${{ number_format($totalPagado, 2) }}
                             </h5>
@@ -325,7 +327,9 @@
                     </div>
                     <div class="col-md-4">
                         <div class="p-3 rounded-3 border">
-                            <small class="text-muted d-block mb-1">Saldo Pendiente</small>
+                            <h5 class="mb-0 fw-bold {{ $saldoPendiente > 0 ? 'text-danger' : 'text-success' }}">
+                                Saldo Pendiente
+                            </h5>
                             <h5 class="mb-0 fw-bold {{ $saldoPendiente > 0 ? 'text-danger' : 'text-success' }}">
                                 @if($saldoPendiente > 0)
                                 ${{ number_format($saldoPendiente, 2) }}
@@ -491,7 +495,7 @@
                     <div class="col-md-4">
                         <div class="text-center p-3 rounded-3 border" style="background: rgba(52, 152, 219, 0.05);">
                             <small class="text-muted d-block mb-1">Valor del Alquiler</small>
-                            <h5 class="mb-0 fw-bold text-primary">
+                            <h5 class="mb-0 fw-bold" style="color:#000 !important;">
                                 ${{ number_format($reservation->total_price, 2) }}
                             </h5>
                         </div>
@@ -499,7 +503,7 @@
                     <div class="col-md-4">
                         <div class="text-center p-3 rounded-3 border" style="background: rgba(46, 204, 113, 0.05);">
                             <small class="text-muted d-block mb-1">Total Abonado</small>
-                            <h5 class="mb-0 fw-bold {{ $totalPagado > 0 ? 'text-success' : 'text-muted' }}">
+                            <h5 class="mb-0 fw-bold" style="color:#000 !important;">
                                 ${{ number_format($totalPagado, 2) }}
                             </h5>
                         </div>
@@ -508,7 +512,7 @@
                         <div class="text-center p-3 rounded-3 border"
                             style="background: {{ $pendiente > 0 ? 'rgba(231, 76, 60, 0.05)' : 'rgba(46, 204, 113, 0.05)' }};">
                             <small class="text-muted d-block mb-1">Saldo por Pagar</small>
-                            <h5 class="mb-0 fw-bold {{ $pendiente > 0 ? 'text-danger' : 'text-success' }}">
+                            <h5 class="mb-0 fw-bold {{ $pendiente > 0 ? 'text-danger' : 'text-success' }}" style="color:#000 !important;">
                                 @if($pendiente > 0)
                                 ${{ number_format($pendiente, 2) }}
                                 @else
