@@ -5,6 +5,7 @@ namespace App\Livewire;
 use Livewire\Component;
 use App\Models\Field;
 use App\Models\Reservation;
+use App\Models\BlockedTime;
 use Carbon\Carbon;
 
 class Calendar extends Component
@@ -39,6 +40,11 @@ class Calendar extends Component
         $this->loadReservedDays();
     }
 
+    /**
+     * ==========================
+     * MARCAR DÍAS RESERVADOS + BLOQUEADOS
+     * ==========================
+     */
     public function loadReservedDays()
     {
         $this->reservedDays = [];
@@ -48,11 +54,20 @@ class Calendar extends Component
         $start = Carbon::create($this->currentYear, $this->currentMonth, 1)->toDateString();
         $end   = Carbon::create($this->currentYear, $this->currentMonth, 1)->endOfMonth()->toDateString();
 
-        $dates = Reservation::where('field_id', $this->selectedField)
+        // RESERVAS
+        $reservedDates = Reservation::where('field_id', $this->selectedField)
             ->whereBetween('date', [$start, $end])
             ->pluck('date');
 
-        foreach ($dates as $d) {
+        // BLOQUEOS
+        $blockedDates = BlockedTime::where('field_id', $this->selectedField)
+            ->whereBetween('date', [$start, $end])
+            ->pluck('date');
+
+        // UNIR Y MARCAR DÍAS
+        $days = $reservedDates->merge($blockedDates);
+
+        foreach ($days->unique() as $d) {
             $this->reservedDays[] = Carbon::parse($d)->day;
         }
     }
@@ -107,17 +122,25 @@ class Calendar extends Component
             ->get();
     }
 
+    /**
+     * ==========================
+     * MARCAR HORARIOS DISPONIBLES
+     * (Reserva + Bloqueo)
+     * ==========================
+     */
     public function loadAvailability()
     {
         $this->availableHours = [];
 
         if (!$this->selectedDate) return;
 
+        // Horario laboral
         $hours = [];
         for ($i = 6; $i <= 22; $i++) {
             $hours[] = sprintf('%02d:00', $i);
         }
 
+        // BLOQUEAR HORAS POR RESERVAS
         foreach ($this->dayReservations as $res) {
 
             $start = Carbon::parse($res->start_time)->format('H:00');
@@ -130,12 +153,30 @@ class Calendar extends Component
             }
         }
 
+        // BLOQUEAR HORAS POR BLOQUEOS
+        $blocks = BlockedTime::where('field_id', $this->selectedField)
+            ->where('date', $this->selectedDate)
+            ->get();
+
+        foreach ($blocks as $block) {
+            $start = Carbon::parse($block->start_time)->format('H:00');
+            $end   = Carbon::parse($block->end_time)->format('H:00');
+
+            foreach ($hours as $i => $hour) {
+                if ($hour >= $start && $hour < $end) {
+                    unset($hours[$i]);
+                }
+            }
+        }
+
         $this->availableHours = array_values($hours);
     }
 
-      /* ==========================
-        funcion de reservar
-    ========================== */
+    /**
+     * ==========================
+     * FUNCIÓN DE RESERVAR
+     * ==========================
+     */
     public function reserve()
     {
         $this->validate([
@@ -145,21 +186,16 @@ class Calendar extends Component
             'duration'      => 'required|integer|min:1'
         ]);
 
-        // Convertir duration en entero 
         $this->duration = intval($this->duration);
-
-        // Convertir hora de inicio a Carbon
         $start = Carbon::parse($this->start_time);
-
-        // Asegurar que no se pase un string a addHours
         $end = $start->copy()->addHours($this->duration);
 
-        
+        // VALIDAR TRASLAPE CON RESERVAS
         $conflict = Reservation::where('field_id', $this->selectedField)
             ->where('date', $this->selectedDate)
             ->where(function ($q) use ($start, $end) {
                 $q->where('start_time', '<', $end)
-                ->where('end_time', '>', $start);
+                  ->where('end_time', '>', $start);
             })
             ->first();
 
@@ -169,6 +205,23 @@ class Calendar extends Component
             return;
         }
 
+        // VALIDAR BLOQUEOS
+        $blocked = BlockedTime::where('field_id', $this->selectedField)
+            ->where('date', $this->selectedDate)
+            ->where(function ($q) use ($start, $end) {
+                $q->where('start_time', '<', $end)
+                  ->where('end_time', '>', $start);
+            })
+            ->first();
+
+        if ($blocked) {
+            $motivo = $blocked->reason ?: "Mantenimiento";
+            $this->errorMessage = " La cancha está bloqueada: $motivo";
+            $this->successMessage = null;
+            return;
+        }
+
+        // Crear reserva
         Reservation::create([
             'client_id'   => 1,
             'field_id'    => $this->selectedField,
@@ -187,10 +240,7 @@ class Calendar extends Component
         $this->loadDayReservations();
         $this->loadAvailability();
     }
-    
-    /* ==========================
-        REINICIAR FORMULARIO
-    ========================== */
+
     public function resetForm()
     {
         $this->selectedField = null;

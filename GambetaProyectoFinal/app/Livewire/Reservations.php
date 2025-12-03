@@ -7,6 +7,7 @@ use Livewire\WithPagination;
 use App\Models\Reservation;
 use App\Models\Client;
 use App\Models\Field;
+use App\Models\BlockedTime;
 use Carbon\Carbon;
 
 class Reservations extends Component
@@ -39,7 +40,6 @@ class Reservations extends Component
         'name.required' => 'El nombre del cliente es obligatorio.',
         'phone.string' => 'El teléfono debe ser válido.',
         'team.string' => 'El nombre del equipo debe ser válido.',
-
         'field_id.required' => 'Debe seleccionar una cancha.',
         'date.required' => 'La fecha es obligatoria.',
         'start_time.required' => 'Debe ingresar una hora de inicio.',
@@ -72,23 +72,77 @@ class Reservations extends Component
         $this->date = '';
         $this->start_time = '';
         $this->duration = '';
-        $this->total_price = '';
+        $this->total_price = 0;
         $this->status = 'pendiente';
     }
 
+    /**
+     * CALCULO DE TOTAL
+     */
     public function calculateTotal()
     {
-        if (!$this->field_id || !$this->duration) return;
+        if (empty($this->field_id) || empty($this->duration)) {
+            $this->total_price = 0;
+            return;
+        }
 
         $field = Field::find($this->field_id);
-        $this->total_price = $field->price_per_hour * intval($this->duration);
+
+        if (!$field) {
+            $this->total_price = 0;
+            return;
+        }
+
+        $price = $field->price_per_hour;
+
+        $this->total_price = $price * intval($this->duration);
     }
 
+    /**
+     * GUARDAR RESERVA
+     */
     public function saveReservation()
     {
         $this->validate();
 
-        // Guardar o encontrar cliente
+        // Hora final
+        $duration = intval($this->duration);
+        $end_time = Carbon::parse($this->start_time)
+            ->addHours($duration)
+            ->format('H:i');
+
+
+        $exists = Reservation::where('field_id', $this->field_id)
+            ->where('date', $this->date)
+            ->where(function ($q) use ($end_time) {
+                $q->where('start_time', '<', $end_time)
+                  ->where('end_time', '>', $this->start_time);
+            })
+            ->when($this->reservation_id, function ($q) {
+                $q->where('id', '!=', $this->reservation_id);
+            })
+            ->exists();
+
+        if ($exists) {
+            $this->errorMessage = " Ese horario ya está reservado para esta cancha.";
+            return;
+        }
+
+
+        $blocked = BlockedTime::where('field_id', $this->field_id)
+            ->where('date', $this->date)
+            ->where(function ($q) use ($end_time) {
+                $q->where('start_time', '<', $end_time)
+                  ->where('end_time', '>', $this->start_time);
+            })
+            ->exists();
+
+        if ($blocked) {
+            $this->errorMessage = "Esta cancha está bloqueada en este horario (mantenimiento o evento).";
+            return;
+        }
+
+
         $client = Client::updateOrCreate(
             ['id' => $this->client_id],
             [
@@ -98,11 +152,7 @@ class Reservations extends Component
             ]
         );
 
-        // Calcular hora final
-        $duration = intval($this->duration);
-        $end_time = Carbon::parse($this->start_time)->addHours($duration)->format('H:i');
 
-        // Guardar reserva
         Reservation::updateOrCreate(
             ['id' => $this->reservation_id],
             [
@@ -122,7 +172,9 @@ class Reservations extends Component
         $this->closeModal();
     }
 
-
+    /**
+     * EDITAR RESERVA
+     */
     public function edit($id)
     {
         $res = Reservation::with('client')->find($id);
@@ -137,13 +189,20 @@ class Reservations extends Component
         $this->field_id = $res->field_id;
         $this->date = $res->date;
         $this->start_time = $res->start_time;
-        $this->duration = Carbon::parse($res->start_time)->diffInHours($res->end_time);
-        $this->total_price = $res->total_price;
+
+        $this->duration = Carbon::parse($res->start_time)
+            ->diffInHours($res->end_time);
+
+        $this->calculateTotal();
+
         $this->status = $res->status;
 
         $this->modal = true;
     }
 
+    /**
+     * ACTUALIZAR ESTADO
+     */
     public function updateStatus($id, $newStatus)
     {
         $res = Reservation::find($id);
@@ -157,7 +216,8 @@ class Reservations extends Component
     {
         return view('livewire.reservations', [
             'reservations' => Reservation::with(['client', 'field'])
-                ->latest()->paginate(10),
+                ->latest()
+                ->paginate(10),
             'fields' => Field::all()
         ]);
     }

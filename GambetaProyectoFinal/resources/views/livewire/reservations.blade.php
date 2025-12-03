@@ -2,10 +2,6 @@
 
     <h2 class="fw-bold text-center mb-4 text-primary">Gestión de Reservas</h2>
 
-    @if ($errorMessage)
-    <div class="alert alert-danger fw-bold shadow-sm">{{ $errorMessage }}</div>
-    @endif
-
     <div class="d-flex justify-content-end mb-3">
         <button class="btn btn-primary shadow-sm px-4" wire:click="openModal">
             <i class="bi bi-plus-circle me-1"></i> Nueva reserva
@@ -50,11 +46,22 @@
                         </select>
                     </td>
 
-                    <td>
-                        <button class="btn btn-warning btn-sm shadow-sm" wire:click="edit({{ $res->id }})">
+                    <td class="d-flex justify-content-center gap-2">
+
+                        <!-- BOTÓN DE PAGO -->
+                        <a href="/admin/reservas/{{ $res->id }}/pagos"
+                        class="btn btn-success btn-sm shadow-sm">
+                            Pago
+                        </a>
+
+                        <!-- BOTÓN EDITAR -->
+                        <button class="btn btn-warning btn-sm shadow-sm"
+                                wire:click="edit({{ $res->id }})">
                             <i class="bi bi-pencil-square"></i> Editar
                         </button>
+
                     </td>
+
                 </tr>
                 @endforeach
             </tbody>
@@ -121,6 +128,15 @@
 
                 <div class="modal-body">
 
+                    <!-- ============================
+                         ERROR DENTRO DEL MODAL
+                    ============================= -->
+                    @if ($errorMessage)
+                        <div class="alert alert-danger fw-bold shadow-sm mb-3">
+                            {{ $errorMessage }}
+                        </div>
+                    @endif
+
                     <div class="row g-3">
 
                         <div class="col-md-6">
@@ -176,7 +192,7 @@
                                     <option value="{{ sprintf('%02d:00', $h) }}">
                                     {{ sprintf('%02d:00', $h) }}
                                     </option>
-                                    @endfor
+                                @endfor
                             </select>
                             @error('start_time')
                             <span class="text-danger small">{{ $message }}</span>
@@ -240,4 +256,5 @@
         </div>
     </div>
     @endif
+
 </div>
