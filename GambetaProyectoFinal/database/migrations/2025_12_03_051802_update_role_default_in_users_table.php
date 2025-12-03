@@ -9,18 +9,22 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up()
+    public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('role')->default('recepcionista'); // admin o recepcionista
+            // Cambiar el default de la columna role
+            $table->string('role')->default('admin')->change();
         });
     }
 
-    public function down()
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('role');
+            // Volver a recepcionista si se hace rollback
+            $table->string('role')->default('recepcionista')->change();
         });
     }
-
 };

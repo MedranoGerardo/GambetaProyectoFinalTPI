@@ -50,11 +50,22 @@
                         </select>
                     </td>
 
-                    <td>
-                        <button class="btn btn-warning btn-sm shadow-sm" wire:click="edit({{ $res->id }})">
+                    <td class="d-flex justify-content-center gap-2">
+
+                        <!-- BOTÓN DE PAGO -->
+                        <a href="/admin/reservas/{{ $res->id }}/pagos"
+                        class="btn btn-success btn-sm shadow-sm">
+                            Pago
+                        </a>
+
+                        <!-- BOTÓN EDITAR -->
+                        <button class="btn btn-warning btn-sm shadow-sm"
+                                wire:click="edit({{ $res->id }})">
                             <i class="bi bi-pencil-square"></i> Editar
                         </button>
+
                     </td>
+
                 </tr>
                 @endforeach
             </tbody>

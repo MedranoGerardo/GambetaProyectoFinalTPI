@@ -153,3 +153,7 @@
     justify-content: center;
     text-align: center;
 }
+
+.dark-mode .eye-toggle-icon {
+    color: #000 !important;
+}
