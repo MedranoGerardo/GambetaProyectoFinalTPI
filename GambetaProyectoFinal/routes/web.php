@@ -30,3 +30,4 @@ Route::get('/reservations/{id}/payments', function ($id) {
 });
 
 Route::get('/reservations/{id}/pdf', [PaymentPDFController::class, 'generate']);
+Route::get('/payments/{id}/pdf', [PaymentPDFController::class, 'generate']);

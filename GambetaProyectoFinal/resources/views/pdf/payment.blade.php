@@ -2,15 +2,16 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Comprobante de Pago</title>
+    <title>Comprobante de Pago - GAMBETA</title>
 
     <style>
         body {
-            font-family: DejaVu Sans, sans-serif;
+            font-family: sans-serif;
             font-size: 12px;
             color: #2c3e50;
             margin: 0;
-            padding: 20px 35px;
+            padding: 22px 35px;
+            background: #ffffff;
         }
 
         .title {
@@ -18,30 +19,31 @@
             font-size: 26px;
             font-weight: bold;
             color: #1A7FB8;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
         }
 
         .subtitle {
             text-align: center;
             font-size: 14px;
             color: #555;
-            margin-bottom: 20px;
+            margin-bottom: 22px;
         }
 
         .section-title {
             background: #1A7FB8;
             color: white;
             padding: 8px 10px;
-            border-radius: 4px;
+            border-radius: 4px 4px 0 0;
             font-size: 14px;
+            font-weight: bold;
             margin-top: 25px;
             margin-bottom: 0;
         }
 
         .section-box {
-            border: 1px solid #1A7FB8;
-            border-top: none;
-            padding: 12px 12px;
+            border: 1px solid #d2e6f7;
+            padding: 12px;
             border-radius: 0 0 4px 4px;
             background: #f6fbff;
         }
@@ -56,14 +58,14 @@
         }
 
         .value {
-            color: #2c3e50;
+            color: #34495e;
         }
 
         .amount-box {
             background: #27ae60;
             color: white;
             text-align: center;
-            padding: 15px;
+            padding: 16px;
             border-radius: 6px;
             margin: 25px 0;
         }
@@ -74,18 +76,7 @@
             margin: 5px 0;
         }
 
-        .footer {
-            text-align: center;
-            font-size: 10px;
-            margin-top: 30px;
-            color: #7f8c8d;
-        }
-
-        .footer strong {
-            color: #1A7FB8;
-        }
-
-        table {
+        .summary-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
@@ -100,12 +91,27 @@
             border-bottom: none;
             font-weight: bold;
         }
+
+        .footer {
+            text-align: center;
+            font-size: 10px;
+            margin-top: 30px;
+            color: #7f8c8d;
+        }
+
+        .footer strong {
+            color: #1A7FB8;
+        }
     </style>
 </head>
+
 <body>
 
+    <!-- TÍTULO PRINCIPAL -->
     <h1 class="title">GAMBETA</h1>
-    <p class="subtitle">Comprobante de Pago — Nº {{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }}</p>
+    <p class="subtitle">
+        Comprobante de Pago — Nº {{ str_pad($payment->id, 6, '0', STR_PAD_LEFT) }}
+    </p>
 
     <!-- CLIENTE -->
     <h3 class="section-title">Información del Cliente</h3>
@@ -119,16 +125,11 @@
     <h3 class="section-title">Datos de la Reserva</h3>
     <div class="section-box">
         <div class="row"><span class="label">Cancha:</span> <span class="value">{{ $payment->reservation->field->name }}</span></div>
-        <div class="row"><span class="label">Fecha:</span> <span class="value">{{ \Carbon\Carbon::parse($payment->reservation->date)->format('d/m/Y') }}</span></div>
-        <div class="row"><span class="label">Horario:</span> <span class="value">{{ $payment->reservation->start_time }} - {{ $payment->reservation->end_time }}</span></div>
-
-        @php
-            $h1 = \Carbon\Carbon::parse($payment->reservation->start_time);
-            $h2 = \Carbon\Carbon::parse($payment->reservation->end_time);
-        @endphp
-
-        <div class="row"><span class="label">Duración:</span> 
-            <span class="value">{{ $h1->diffInHours($h2) }} horas</span>
+        <div class="row"><span class="label">Fecha:</span> <span class="value">{{ $payment->formatted_date }}</span></div>
+        <div class="row"><span class="label">Horario:</span> 
+            <span class="value">
+                {{ $payment->reservation->start_time }} - {{ $payment->reservation->end_time }}
+            </span>
         </div>
     </div>
 
@@ -136,14 +137,18 @@
     <div class="amount-box">
         <div>Monto pagado:</div>
         <div class="amount-big">${{ number_format($payment->amount, 2) }}</div>
-
-        <div style="font-size: 12px; opacity: 0.9;">
+        <div style="font-size: 12px; margin-top:5px;">
             Método: {{ ucfirst($payment->method) }} <br>
             {{ $payment->is_advance ? '(Pago de Adelanto)' : '(Pago Completo)' }}
         </div>
     </div>
 
-    <!-- RESUMEN -->
+    <!-- RESUMEN FINANCIERO -->
+    @php
+        $totalPagado = $payment->reservation->payments->sum('amount');
+        $restante = $payment->reservation->total_price - $totalPagado;
+    @endphp
+
     <h3 class="section-title">Resumen Financiero</h3>
     <div class="section-box">
         <table class="summary-table">
@@ -151,21 +156,22 @@
                 <td>Total de la reserva:</td>
                 <td style="text-align:right;">${{ number_format($payment->reservation->total_price, 2) }}</td>
             </tr>
-            <tr>
-                <td>Monto pagado:</td>
-                <td style="text-align:right;">${{ number_format($payment->amount, 2) }}</td>
-            </tr>
 
-            @php $restante = $payment->reservation->total_price - $payment->amount; @endphp
+            <tr>
+                <td>Total pagado:</td>
+                <td style="text-align:right;">${{ number_format($totalPagado, 2) }}</td>
+            </tr>
 
             @if ($restante > 0)
                 <tr>
                     <td>Saldo pendiente:</td>
-                    <td style="text-align:right; color:#e74c3c;">${{ number_format($restante, 2) }}</td>
+                    <td style="text-align:right; color:#e74c3c;">
+                        ${{ number_format($restante, 2) }}
+                    </td>
                 </tr>
             @else
                 <tr>
-                    <td style="color:#27ae60">Estado:</td>
+                    <td style="color:#27ae60;">Estado:</td>
                     <td style="text-align:right; color:#27ae60;">PAGADO COMPLETO</td>
                 </tr>
             @endif
@@ -175,7 +181,7 @@
     <!-- FOOTER -->
     <div class="footer">
         Documento generado automáticamente por <strong>GAMBETA</strong><br>
-        Fecha: {{ now()->format('d/m/Y H:i:s') }}
+        Fecha: {{ $payment->formatted_created }}
     </div>
 
 </body>
