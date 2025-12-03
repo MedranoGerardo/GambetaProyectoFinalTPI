@@ -21,6 +21,10 @@ class Reservations extends Component
     public $successMessage, $errorMessage;
     public $modal = false;
 
+    public $errorModal = false;
+    public $errorText = '';
+    public $successModal = false;
+
     protected $rules = [
         'name' => 'required|string|max:255',
         'phone' => 'nullable|string|max:50',
@@ -29,6 +33,19 @@ class Reservations extends Component
         'date' => 'required|date',
         'start_time' => 'required',
         'duration' => 'required|integer|min:1',
+    ];
+
+    protected $messages = [
+        'name.required' => 'El nombre del cliente es obligatorio.',
+        'phone.string' => 'El teléfono debe ser válido.',
+        'team.string' => 'El nombre del equipo debe ser válido.',
+
+        'field_id.required' => 'Debe seleccionar una cancha.',
+        'date.required' => 'La fecha es obligatoria.',
+        'start_time.required' => 'Debe ingresar una hora de inicio.',
+        'duration.required' => 'Debe ingresar la duración.',
+        'duration.integer' => 'La duración debe ser un número entero.',
+        'duration.min' => 'La duración mínima es de 1 hora.',
     ];
 
     public function openModal()
@@ -69,12 +86,7 @@ class Reservations extends Component
 
     public function saveReservation()
     {
-        try {
-            $this->validate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            $this->errorMessage = "Por favor complete todos los campos.";
-            return;
-        }
+        $this->validate();
 
         // Guardar o encontrar cliente
         $client = Client::updateOrCreate(
@@ -105,9 +117,11 @@ class Reservations extends Component
             ]
         );
 
-        $this->successMessage = "Reserva guardada correctamente.";
+        $this->successMessage = "La reserva se guardó correctamente.";
+        $this->successModal = true;
         $this->closeModal();
     }
+
 
     public function edit($id)
     {
@@ -148,4 +162,3 @@ class Reservations extends Component
         ]);
     }
 }
-

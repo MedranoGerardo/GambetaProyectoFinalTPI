@@ -14,15 +14,12 @@ class Fields extends Component
     public $name, $type, $price_per_hour, $image, $is_active = true;
     public $field_id;
     public $modal = false;
-    
-    // Nueva propiedad para el modal de eliminación
+
     public $deleteModal = false;
     public $deleteId;
 
-    /************************************** */
     public $duplicateModal = false;
     public $duplicateMessage = '';
-    /************************************** */
 
     protected $rules = [
         'name' => 'required|string|max:255',
@@ -30,6 +27,26 @@ class Fields extends Component
         'price_per_hour' => 'required|numeric|min:0',
         'image' => 'nullable|image|max:2048',
         'is_active' => 'boolean'
+    ];
+
+    //Mensajes personalizados
+    protected $messages = [
+        'name.required' => 'El nombre de la cancha es obligatorio.',
+        'name.string' => 'El nombre de la cancha debe ser texto válido.',
+        'name.max' => 'El nombre no puede superar los 255 caracteres.',
+
+        'type.required' => 'El tipo de cancha es obligatorio.',
+        'type.string' => 'El tipo debe ser texto válido.',
+        'type.max' => 'El tipo no puede superar los 255 caracteres.',
+
+        'price_per_hour.required' => 'El precio por hora es obligatorio.',
+        'price_per_hour.numeric' => 'El precio debe ser un número.',
+        'price_per_hour.min' => 'El precio no puede ser negativo.',
+
+        'image.image' => 'El archivo debe ser una imagen válida.',
+        'image.max' => 'La imagen no puede pesar más de 2MB.',
+
+        'is_active.boolean' => 'El estado debe ser verdadero o falso.',
     ];
 
     public function openModal()
@@ -53,17 +70,16 @@ class Fields extends Component
         $this->is_active = true;
     }
 
-    /****************************************************** */
     public function save()
     {
         $this->validate();
 
-        // Validación de duplicado (nombre + tipo)
+        // Validación de duplicado
         $exists = Field::where('name', $this->name)
-               ->when($this->field_id, function ($query) {
-                   $query->where('id', '!=', $this->field_id);
-               })
-               ->exists();
+            ->when($this->field_id, function ($query) {
+                $query->where('id', '!=', $this->field_id);
+            })
+            ->exists();
 
         if ($exists) {
             $this->duplicateMessage = "El nombre de la cancha ya está registrado. Cambie el nombre para continuar.";
@@ -71,7 +87,6 @@ class Fields extends Component
             return;
         }
 
-        // Procesamiento de imagen
         $path = null;
         if ($this->image) {
             $path = $this->image->store('fields', 'public');
@@ -90,7 +105,6 @@ class Fields extends Component
 
         $this->closeModal();
     }
-    /****************************************************** */
 
     public function edit($id)
     {
@@ -105,21 +119,18 @@ class Fields extends Component
         $this->modal = true;
     }
 
-    // Nuevo método para confirmar eliminación
     public function confirmDelete($id)
     {
         $this->deleteId = $id;
         $this->deleteModal = true;
     }
 
-    // Nuevo método para cerrar modal de eliminación
     public function closeDeleteModal()
     {
         $this->deleteModal = false;
         $this->deleteId = null;
     }
 
-    // Método actualizado para eliminar
     public function delete()
     {
         if ($this->deleteId) {
